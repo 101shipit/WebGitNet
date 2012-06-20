@@ -7,15 +7,12 @@
 
 namespace WebGitNet.Controllers
 {
-    using System;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Web.Mvc;
     using System.Web.Routing;
     using WebGitNet.ActionResults;
-    using WebGitNet.Models;
 
     public class BrowseController : SharedControllerBase
     {
@@ -48,6 +45,12 @@ namespace WebGitNet.Controllers
         {
             var resourceInfo = this.FileManager.GetResourceInfo(repo);
             if (resourceInfo.Type != ResourceType.Directory)
+            {
+                return HttpNotFound();
+            }
+
+            var repoInfo = GitUtilities.GetRepoInfo(resourceInfo.FullPath);
+            if (!repoInfo.IsGitRepo)
             {
                 return HttpNotFound();
             }
@@ -207,19 +210,6 @@ namespace WebGitNet.Controllers
             return View((object)model);
         }
 
-        public ActionResult ToggleArchived(string repo)
-        {
-            var resourceInfo = this.FileManager.GetResourceInfo(repo);
-            if (resourceInfo.Type != ResourceType.Directory)
-            {
-                return HttpNotFound();
-            }
-
-            GitUtilities.ToggleArchived(resourceInfo.FullPath);
-
-            return RedirectToAction("ViewRepo", new { repo = repo });
-        }
-
         public class RouteRegisterer : IRouteRegisterer
         {
             public void RegisterRoutes(RouteCollection routes)
@@ -258,11 +248,6 @@ namespace WebGitNet.Controllers
                     "View Commit Log",
                     "browse/{repo}/commits",
                     new { controller = "Browse", action = "ViewCommits", routeName = "View Commit Log" });
-
-                routes.MapRoute(
-                    "Toggle Archived",
-                    "browse/togglearchived/{repo}",
-                    new { controller = "Browse", action = "ToggleArchived" });
             }
         }
     }
