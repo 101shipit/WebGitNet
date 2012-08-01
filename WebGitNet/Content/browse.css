@@ -69,12 +69,14 @@
 
 .diff-line
 {
-    white-space: pre;
+  /*  white-space: pre; */
 }
 
 .diff-line-add { background: #afa; }
 .diff-line-remove { background: #faa; }
 .diff-line-info { background: #ddd; }
+.diff-line-copy { background: #fff67D;}
+.diff-line-rename { background: #fff67D;}
 
 .repo-info input 
 {

@@ -605,6 +605,88 @@ namespace WebGitNet
             return diffs;
         }
 
+        public static List<DiffInfo> GetDiffSummary(string repoPath, string commit)
+        {
+            var diffs = new List<DiffInfo>();
+            List<string> diffLines = null;
+
+            Action addLastDiff = () =>
+            {
+                if (diffLines != null)
+                {
+                    diffs.Add(new DiffInfo(diffLines));
+                }
+            };
+
+            using (var git = Start(string.Format("diff-tree -M -C -r {0}", Q(commit)), repoPath))
+            {
+                while (!git.StandardOutput.EndOfStream)
+                {
+                    var line = git.StandardOutput.ReadLine();
+
+                    /* if (diffLines == null && !line.StartsWith("diff"))
+                     {
+                         continue;
+                     }*/
+
+                    if (line.StartsWith(commit))
+                    {
+                        addLastDiff();
+                        diffLines = new List<string> { };
+                    }
+                    else
+                    {
+                        diffLines.Add(line);
+                    }
+                }
+            }
+
+            addLastDiff();
+
+            return diffs;
+        }
+
+        public static List<DiffInfo> GetDiffFile(string repoPath, string commit, string file)
+        {
+            var diffs = new List<DiffInfo>();
+            List<string> diffLines = null;
+
+            Action addLastDiff = () =>
+            {
+                if (diffLines != null)
+                {
+                    diffs.Add(new DiffInfo(diffLines));
+                }
+            };
+            var parent = commit + "^";
+            using (var git = Start(string.Format("diff {0} {1} -- {2}", Q(parent), Q(commit), Q(file)), repoPath))
+            {
+                while (!git.StandardOutput.EndOfStream)
+                {
+                    var line = git.StandardOutput.ReadLine();
+
+                     if (diffLines == null && !line.StartsWith("diff"))
+                     {
+                         continue;
+                     }
+
+                     if (line.StartsWith("diff"))
+                    {
+                        addLastDiff();
+                        diffLines = new List<string> { line };
+                    }
+                    else
+                    {
+                        diffLines.Add(line);
+                    }
+                }
+            }
+
+            addLastDiff();
+
+            return diffs;
+        }
+
         public static TreeView GetTreeInfo(string repoPath, string tree, string path = null)
         {
             if (string.IsNullOrEmpty(tree))

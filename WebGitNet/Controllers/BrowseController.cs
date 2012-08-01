@@ -5,6 +5,8 @@
 // <author>John Gietzen</author>
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace WebGitNet.Controllers
 {
     using System.IO;
@@ -67,28 +69,34 @@ namespace WebGitNet.Controllers
             return View();
         }
 
-        public ActionResult ViewCommit(string repo, string @object)
+        public ActionResult ViewCommit(string repo, string @object, string file = null, string divId = null)
         {
-            var resourceInfo = this.FileManager.GetResourceInfo(repo);
+            var resourceInfo = FileManager.GetResourceInfo(repo);
             if (resourceInfo.Type != ResourceType.Directory)
             {
                 return HttpNotFound();
             }
 
             AddRepoBreadCrumb(repo);
-            this.BreadCrumbs.Append("Browse", "ViewCommit", @object, new { repo, @object });
+            BreadCrumbs.Append("Browse", "ViewCommitSummary", @object, new { repo, @object });
 
             var commit = GitUtilities.GetLogEntries(resourceInfo.FullPath, 1, 0, @object).FirstOrDefault();
             if (commit == null)
             {
                 return HttpNotFound();
             }
-
-            var diffs = GitUtilities.GetDiffInfo(resourceInfo.FullPath, commit.CommitHash);
-
+            
             ViewBag.RepoName = resourceInfo.Name;
             ViewBag.CommitLogEntry = commit;
 
+            List<DiffInfo> diffs;
+            if (Request.IsAjaxRequest())
+            {
+                ViewBag.DivID = divId;
+                diffs = GitUtilities.GetDiffFile(resourceInfo.FullPath, commit.CommitHash, file);
+                return PartialView("FileDiff", diffs);
+            }
+            diffs = GitUtilities.GetDiffSummary(resourceInfo.FullPath, commit.CommitHash);
             return View(diffs);
         }
 

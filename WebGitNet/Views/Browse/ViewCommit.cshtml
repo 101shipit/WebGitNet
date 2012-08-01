@@ -7,12 +7,17 @@
     {
         switch (c)
         {
-            case '+':
+            case 'A':
                 return "diff-line-add";
-            case '-':
+            case 'D':
                 return "diff-line-remove";
+            case 'M':
             case ' ':
                 return "diff-line-context";
+            case 'C':
+                return "diff-line-copy";
+            case 'R':
+                return "diff-line-rename";
             default:
                 return "diff-line-info";
         }
@@ -24,6 +29,7 @@
 @section headers
 {
     <script src="@Url.Content("~/Scripts/jquery.timeago.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.min.js")" type="text/javascript"></script>
     <link href="@Url.Content("~/Content/browse.css")" rel="stylesheet" type="text/css" />
     <script>
         $(function () {
@@ -37,11 +43,32 @@
 @foreach (var diff in Model)
 {
 <div class="diff-container page-section">
-  <div class="diff">
-    @foreach (var line in diff.Lines)
-    {
-    <span class="diff-line @diffLineStyle(line[0])">@Html.Raw(Html.Encode(line).Replace(" ", "&nbsp;"))</span><br />
-    }
-  </div>
+    <div class="diff">
+        @if (!diff.Lines[0].StartsWith("diff"))
+        {
+            var count = 0;
+            foreach (var line in diff.Lines)
+            {
+                count++;
+                var lineParts = line.Split('\t');
+                var commitInfoParts = lineParts[0].Split(' ');
+                var modType = commitInfoParts[4];
+
+                <span class="mod-type @diffLineStyle(@modType[0])">
+                    @modType[0]
+                </span>
+                <span>
+                    @Html.Encode(lineParts[lineParts.Count() - 1]).Replace(" ", "&nbsp;")
+                </span>
+                var spanId = "span" + count;
+                <span id ="@spanId" >
+                    @Ajax.ActionLink(" Diff", "ViewCommit",
+                            new { @object = commitLogEntry.CommitHash, file = lineParts[lineParts.Count() - 1], divId = Convert.ToString(count) },
+                            new AjaxOptions { HttpMethod = "GET", UpdateTargetId = spanId, InsertionMode = InsertionMode.Replace })
+                    
+                </span><br/>
+            }
+        }
+    </div>
 </div>
 }

@@ -249,6 +249,7 @@
     <Content Include="Views\Graph\ViewGraph.cshtml" />
     <Content Include="Views\Browse\ArchivedIndex.cshtml" />
     <Content Include="Views\Manage\ManageRepo.cshtml" />
+    <Content Include="Views\Browse\FileDiff.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

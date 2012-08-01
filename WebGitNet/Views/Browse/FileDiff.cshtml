@@ -1,0 +1,34 @@
+﻿@model IList<DiffInfo>
+@{
+    Func<char, string> diffLineStyle = c =>
+    {
+        switch (c)
+        {
+            case '+':
+                return "diff-line-add";
+            case '-':
+                return "diff-line-remove";
+            case ' ':
+                return "diff-line-context";
+            default:
+                return "diff-line-info";
+        }
+    };
+}
+
+@foreach (var diff in Model)
+{
+        if (diff.Lines[0].StartsWith("diff"))
+        {
+            var divName = "diff" + @ViewBag.DivID;
+            <a href="#" onclick="$(@divName).toggle();">Diff</a>
+            <div id="@divName" class="diff-container">
+                @foreach (var line in diff.Lines)
+                {
+                    <span class="diff-line @diffLineStyle(line[0])">@Html.Raw(Html.Encode(line).Replace(" ", "&nbsp;"))</span>
+                    <br />
+                }
+            </div>
+        }              
+}
+   
