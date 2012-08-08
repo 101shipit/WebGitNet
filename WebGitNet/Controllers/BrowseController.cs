@@ -78,7 +78,7 @@ namespace WebGitNet.Controllers
             }
 
             AddRepoBreadCrumb(repo);
-            BreadCrumbs.Append("Browse", "ViewCommitSummary", @object, new { repo, @object });
+            BreadCrumbs.Append("Browse", "ViewCommit", @object, new { repo, @object });
 
             var commit = GitUtilities.GetLogEntries(resourceInfo.FullPath, 1, 0, @object).FirstOrDefault();
             if (commit == null)
