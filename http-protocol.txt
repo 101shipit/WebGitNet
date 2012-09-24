@@ -11,7 +11,6 @@ protocol URLs to smart URLs.  This permits all users to have the
 same published URL, and the peers automatically select the most
 efficient transport available to them.
 
-
 URL Format
 ----------
 
